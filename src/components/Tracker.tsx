@@ -4,6 +4,20 @@ import { ApiError, fetchState, save, type AppState, type PlayerState, type Sessi
 import { classCount, classStage, counts, globalStage, levelOf, type Progress } from '../lib/rules'
 
 const POLL_MS = 5000
+const DESKTOP_QUERY = '(min-width: 1100px) and (pointer: fine)'
+
+/** Vue ordi : écran large + souris. Téléphone et tablette gardent la vue mobile. */
+function useDesktop() {
+  const get = () => typeof window !== 'undefined' && window.matchMedia(DESKTOP_QUERY).matches
+  const [desktop, setDesktop] = useState(get)
+  useEffect(() => {
+    const mq = window.matchMedia(DESKTOP_QUERY)
+    const on = () => setDesktop(mq.matches)
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+  return desktop
+}
 const TIER_NAME = ['', 'Gold', 'Platinum', 'Harmonic Break', 'Terminé']
 const PREFS_KEY = '33k:prefs'
 
@@ -92,6 +106,59 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
   }
 
   const masteryOpen = counts(me.progress).divergence
+  const desktop = useDesktop()
+
+  const mastery = (
+    <section className="cls">
+      <header className="cls-head">
+        <h2 title={masteryOpen ? undefined : "S'ouvrent avec Harmonic Break sur les 33 armes."}>Mastery</h2>
+      </header>
+      {!masteryOpen && !desktop && <p className="challenge">S'ouvrent avec Harmonic Break sur les 33 armes.</p>}
+      {MASTERY.map((m) => {
+        const done = Boolean(me.mastery[m.id])
+        return (
+          <div key={m.id} className="row" title={desktop ? `${m.mode}, ${m.challenge}` : undefined}>
+            <div className="row-name">
+              <span>{m.name}</span>
+              {!desktop && <small>{m.mode}, {m.challenge}</small>}
+            </div>
+            <button
+              className={`tier t3 ${done ? 'on' : ''}`}
+              aria-pressed={done}
+              aria-label={`${m.name} : ${done ? 'fait' : 'pas fait'}`}
+              onClick={() => commit('mastery', m.id, done ? 0 : 1)}
+            >
+              ✓
+            </button>
+          </div>
+        )
+      })}
+    </section>
+  )
+
+  if (desktop) {
+    return (
+      <div className="app desk">
+        <aside className="side">
+          <header className="top">
+            <span className="wordmark">33K</span>
+            <button className="link" onClick={onSignOut} title="Changer de joueur">{meName}</button>
+          </header>
+          <section className="board static" aria-label="Progression">
+            <MyLine name={meName} state={me} />
+            <TeamRacks meId={meId} state={state} />
+          </section>
+        </aside>
+        <main className="desk-cols">
+          {CLASSES.map((c) => (
+            <ClassSection key={c.id} cls={c} me={me.progress} remaining={false} onTap={tapTier} compact />
+          ))}
+          {mastery}
+        </main>
+        {toast && <div className="toast" role="status">{toast}</div>}
+      </div>
+    )
+  }
 
   return (
     <div className="app">
@@ -142,31 +209,7 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
           <ClassSection key={c.id} cls={c} me={me.progress} remaining={remaining} onTap={tapTier} />
         ))}
 
-        {filter === 'all' && <section className="cls">
-          <header className="cls-head">
-            <h2>Mastery</h2>
-          </header>
-          {!masteryOpen && <p className="challenge">S'ouvrent avec Harmonic Break sur les 33 armes.</p>}
-          {MASTERY.map((m) => {
-            const done = Boolean(me.mastery[m.id])
-            return (
-              <div key={m.id} className="row">
-                <div className="row-name">
-                  <span>{m.name}</span>
-                  <small>{m.mode}, {m.challenge}</small>
-                </div>
-                <button
-                  className={`tier t3 ${done ? 'on' : ''}`}
-                  aria-pressed={done}
-                  aria-label={`${m.name} : ${done ? 'fait' : 'pas fait'}`}
-                  onClick={() => commit('mastery', m.id, done ? 0 : 1)}
-                >
-                  ✓
-                </button>
-              </div>
-            )
-          })}
-        </section>}
+        {filter === 'all' && mastery}
       </main>
 
       {toast && <div className="toast" role="status">{toast}</div>}
@@ -228,11 +271,12 @@ function TeamRacks({ meId, state }: { meId: string; state: AppState }) {
   )
 }
 
-function ClassSection({ cls, me, remaining, onTap }: {
+function ClassSection({ cls, me, remaining, onTap, compact = false }: {
   cls: WeaponClass
   me: Progress
   remaining: boolean
   onTap: (weaponId: string, tier: number) => void
+  compact?: boolean
 }) {
   const stage = classStage(cls, me)
   const total = cls.weapons.length
@@ -242,12 +286,12 @@ function ClassSection({ cls, me, remaining, onTap }: {
   return (
     <section className="cls">
       <header className="cls-head">
-        <h2>{cls.name}</h2>
+        <h2 title={compact && ch ? `${ch.mp} en MP, ${ch.dmz} en DMZ` : undefined}>{cls.name}</h2>
         <span className={`stage t${Math.min(stage, 3)} ${stage === 4 ? 'done' : ''}`}>
           {stage === 4 ? 'Terminé' : `${TIER_NAME[stage]} ${classCount(cls, me, stage)}/${total}`}
         </span>
       </header>
-      {ch && <p className="challenge">{ch.mp} en MP, {ch.dmz} en DMZ</p>}
+      {ch && !compact && <p className="challenge">{ch.mp} en MP, {ch.dmz} en DMZ</p>}
 
       {visible.map((w) => {
         const lvl = levelOf(me, w.id)

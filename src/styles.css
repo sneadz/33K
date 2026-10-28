@@ -204,3 +204,40 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .cat[aria-pressed='true'] { background: var(--gold); color: #2a1e05; }
 .cat[aria-pressed='true'] small { color: #2a1e05; }
 .switch { margin-top: 12px; }
+
+/* Vue ordi : tout sur un écran, sans scroll */
+.app.desk {
+  max-width: 1500px;
+  height: 100dvh;
+  padding: 24px 32px;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 40px;
+  overflow: hidden;
+}
+.desk .side { display: flex; flex-direction: column; min-height: 0; }
+.desk .board.static { cursor: default; }
+.desk .board.static:active { background: var(--surface); }
+.desk .team { margin-top: 18px; gap: 14px; }
+.desk-cols {
+  columns: 3;
+  column-gap: 40px;
+  min-height: 0;
+}
+.desk-cols .cls { break-inside: avoid; padding: 0 0 16px; }
+.desk-cols .cls-head { margin-bottom: 4px; }
+.desk-cols .cls-head h2 { font-size: 22px; cursor: help; }
+.desk-cols .stage { font-size: 13px; }
+.desk-cols .row { min-height: 30px; gap: 8px; }
+.desk-cols .row-name span { font-size: 15px; }
+.desk-cols .tiers { gap: 4px; }
+.desk-cols .tier { width: 30px; height: 26px; border-radius: 6px; font-size: 14px; }
+@media (min-height: 860px) {
+  .desk-cols .cls { padding-bottom: 24px; }
+  .desk-cols .cls-head h2 { font-size: 26px; }
+  .desk-cols .stage { font-size: 14px; }
+  .desk-cols .row { min-height: 40px; }
+  .desk-cols .row-name span { font-size: 17px; }
+  .desk-cols .tier { width: 38px; height: 34px; font-size: 16px; }
+  .app.desk { grid-template-columns: 340px 1fr; padding-top: 36px; }
+}
