@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "33k is a shared gold camo tracker for two players chasing all 33 weapons in Modern Warfare 4: tick, sync, and see what's left at a glance.",
+  "description": "33k is a shared gold camo tracker for a squad chasing all 33 weapons in Modern Warfare 4: tick, sync, and see what's left at a glance.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

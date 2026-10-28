@@ -38,7 +38,7 @@ export default defineConfig({
       manifest: {
         name: '33K',
         short_name: '33K',
-        description: 'Suivi des camos MW4 à deux : Gold, Platinum, Harmonic Break et mastery.',
+        description: 'Suivi des camos MW4 entre potes : Gold, Platinum, Harmonic Break et mastery.',
         lang: 'fr',
         theme_color: '#1b1f17',
         background_color: '#1b1f17',

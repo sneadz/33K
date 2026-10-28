@@ -1,6 +1,6 @@
 # 33K
 
-33k is a shared gold camo tracker for two players chasing all 33 weapons in Modern Warfare 4: tick, sync, and see what's left at a glance.
+33k is a shared gold camo tracker for a squad chasing all 33 weapons in Modern Warfare 4: tick, sync, and see what's left at a glance.
 
 ## Fonctionnement
 
