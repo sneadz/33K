@@ -205,39 +205,41 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .cat[aria-pressed='true'] small { color: #2a1e05; }
 .switch { margin-top: 12px; }
 
-/* Vue ordi : tout sur un écran, sans scroll */
+/* Vue ordi : toute la fenêtre, sans scroll. --rh = hauteur d'une ligne, calée sur la hauteur de l'écran
+   (la colonne la plus chargée fait ~21 lignes : 15 armes + 3 titres). */
 .app.desk {
-  max-width: 1500px;
+  --rh: clamp(30px, calc((100dvh - 80px) / 19.5), 68px);
+  max-width: none;
   height: 100dvh;
-  padding: 24px 32px;
+  padding: clamp(20px, 3vh, 44px) clamp(24px, 3vw, 64px);
   display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 40px;
+  grid-template-columns: clamp(420px, 31vw, 640px) 1fr;
+  gap: clamp(32px, 3.5vw, 80px);
   overflow: hidden;
 }
 .desk .side { display: flex; flex-direction: column; min-height: 0; }
-.desk .board.static { cursor: default; }
+.desk .top { padding-bottom: calc(var(--rh) * 0.5); }
+.desk .wordmark { font-size: calc(var(--rh) * 1.1); }
+.desk .board.static { cursor: default; padding: calc(var(--rh) * 0.6) calc(var(--rh) * 0.5); }
 .desk .board.static:active { background: var(--surface); }
-.desk .team { margin-top: 18px; gap: 14px; }
-.desk-cols {
-  columns: 3;
-  column-gap: 40px;
-  min-height: 0;
-}
-.desk-cols .cls { break-inside: avoid; padding: 0 0 16px; }
-.desk-cols .cls-head { margin-bottom: 4px; }
-.desk-cols .cls-head h2 { font-size: 22px; cursor: help; }
-.desk-cols .stage { font-size: 13px; }
-.desk-cols .row { min-height: 30px; gap: 8px; }
-.desk-cols .row-name span { font-size: 15px; }
-.desk-cols .tiers { gap: 4px; }
-.desk-cols .tier { width: 30px; height: 26px; border-radius: 6px; font-size: 14px; }
-@media (min-height: 860px) {
-  .desk-cols .cls { padding-bottom: 24px; }
-  .desk-cols .cls-head h2 { font-size: 26px; }
-  .desk-cols .stage { font-size: 14px; }
-  .desk-cols .row { min-height: 40px; }
-  .desk-cols .row-name span { font-size: 17px; }
-  .desk-cols .tier { width: 38px; height: 34px; font-size: 16px; }
-  .app.desk { grid-template-columns: 340px 1fr; padding-top: 36px; }
+.desk .pname { font-size: calc(var(--rh) * 0.8); }
+.desk .me-count { font-size: calc(var(--rh) * 0.45); }
+.desk .me-count b { font-size: calc(var(--rh) * 1.15); }
+.desk .racks { --cat-gap: calc(var(--rh) * 0.18); column-gap: 2px; margin-top: calc(var(--rh) * 0.4); }
+.desk .racks i { border-radius: 3px; }
+.desk .team { margin-top: calc(var(--rh) * 0.8); gap: calc(var(--rh) * 0.55); }
+.desk .mate-head { font-size: calc(var(--rh) * 0.42); margin-bottom: calc(var(--rh) * 0.2); }
+
+.desk-cols { columns: 3; column-gap: clamp(32px, 3.5vw, 80px); min-height: 0; }
+.desk-cols .cls { break-inside: avoid; padding: 0 0 calc(var(--rh) * 0.6); }
+.desk-cols .cls-head { margin-bottom: calc(var(--rh) * 0.1); }
+.desk-cols .cls-head h2 { font-size: calc(var(--rh) * 0.78); cursor: help; }
+.desk-cols .stage { font-size: calc(var(--rh) * 0.42); }
+.desk-cols .row { min-height: var(--rh); gap: 10px; }
+.desk-cols .row-name span { font-size: calc(var(--rh) * 0.5); }
+.desk-cols .tiers { gap: calc(var(--rh) * 0.14); }
+.desk-cols .tier {
+  width: calc(var(--rh) * 1.05); height: calc(var(--rh) * 0.84);
+  border-radius: calc(var(--rh) * 0.2);
+  font-size: calc(var(--rh) * 0.46);
 }
