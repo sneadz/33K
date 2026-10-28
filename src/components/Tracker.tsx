@@ -100,11 +100,21 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
         <button className="link" onClick={onSignOut} title="Changer de joueur">{meName}</button>
       </header>
 
-      <section className="board" aria-label="Progression">
+      <section
+        className="board"
+        role="button"
+        tabIndex={0}
+        aria-expanded={teamOpen}
+        aria-label={teamOpen ? "Replier l'équipe" : "Déplier l'équipe"}
+        onClick={() => setTeamOpen((o) => !o)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTeamOpen((o) => !o) }
+        }}
+      >
         <MyLine name={meName} state={me} />
-        <button className="team-toggle" aria-expanded={teamOpen} onClick={() => setTeamOpen((o) => !o)}>
-          Équipe <span aria-hidden="true">{teamOpen ? '▴' : '▾'}</span>
-        </button>
+        <span className="team-toggle" aria-hidden="true">
+          Équipe <span>{teamOpen ? '▴' : '▾'}</span>
+        </span>
         {teamOpen && <TeamRacks meId={meId} state={state} />}
       </section>
 

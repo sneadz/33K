@@ -96,7 +96,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .app { max-width: 640px; margin: 0 auto; padding: max(12px, env(safe-area-inset-top)) 16px 96px; }
 .top { display: flex; justify-content: space-between; align-items: center; padding: 4px 0 16px; }
 
-.board { padding: 14px 16px; background: var(--surface); border-radius: 12px; }
+.board { padding: 14px 16px; background: var(--surface); border-radius: 12px; cursor: pointer; user-select: none; -webkit-user-select: none; }
+.board:active { background: #283023; }
 .me-head { display: flex; justify-content: space-between; align-items: baseline; }
 .pname { font: 800 22px/1 var(--display); }
 .me-count { font: 600 15px/1 var(--body); color: var(--muted); }
