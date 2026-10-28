@@ -108,6 +108,7 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
 
   const masteryOpen = counts(me.progress).divergence
   const desktop = useDesktop()
+  const [sheet, setSheet] = useState<string | null>(null) // arme ouverte dans la fiche (mobile)
   const [detail, setDetail] = useState(
     () => (CLASSES.find((c) => classStage(c, initial.players[meId].progress) < 4) ?? CLASSES[0]).id,
   )
@@ -224,12 +225,13 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
 
       <main>
         {CLASSES.filter((c) => filter === 'all' || filter === c.id).map((c) => (
-          <ClassSection key={c.id} cls={c} me={me.progress} remaining={remaining} onTap={tapTier} />
+          <ClassSection key={c.id} cls={c} me={me.progress} remaining={remaining} onTap={tapTier} onOpen={setSheet} />
         ))}
 
         {filter === 'all' && mastery}
       </main>
 
+      {sheet && <WeaponSheet weaponId={sheet} me={me.progress} onClose={() => setSheet(null)} />}
       {toast && <div className="toast" role="status">{toast}</div>}
     </div>
   )
@@ -289,11 +291,12 @@ function TeamRacks({ meId, state }: { meId: string; state: AppState }) {
   )
 }
 
-function ClassSection({ cls, me, remaining, onTap, compact = false, selected = false }: {
+function ClassSection({ cls, me, remaining, onTap, onOpen, compact = false, selected = false }: {
   cls: WeaponClass
   me: Progress
   remaining: boolean
   onTap: (weaponId: string, tier: number) => void
+  onOpen?: (weaponId: string) => void
   compact?: boolean
   selected?: boolean
 }) {
@@ -316,7 +319,13 @@ function ClassSection({ cls, me, remaining, onTap, compact = false, selected = f
         const lvl = levelOf(me, w.id)
         return (
           <div key={w.id} className="row">
-            <div className="row-name"><span>{w.name}</span></div>
+            {onOpen ? (
+              <button className="row-name row-open" onClick={() => onOpen(w.id)} aria-label={`Défis de la ${w.name}`}>
+                <span>{w.name}</span>
+              </button>
+            ) : (
+              <div className="row-name"><span>{w.name}</span></div>
+            )}
             <div className="tiers" role="group" aria-label={`${w.name}, ${TIER_NAME[lvl] || 'rien'}`}>
               {TIERS.map((t) => (
                 <button
@@ -368,5 +377,63 @@ function ClassDetail({ cls, me }: { cls: WeaponClass; me: Progress }) {
         })}
       </div>
     </section>
+  )
+}
+
+/** Fiche d'une arme (mobile) : ses 3 camos spéciaux, puis les paliers de sa catégorie. */
+function WeaponSheet({ weaponId, me, onClose }: { weaponId: string; me: Progress; onClose: () => void }) {
+  const cls = CLASSES.find((c) => c.weapons.some((w) => w.id === weaponId))!
+  const weapon = cls.weapons.find((w) => w.id === weaponId)!
+  const lvl = levelOf(me, weaponId)
+  const stage = classStage(cls, me)
+  const tiers = [cls.gold, cls.platinum, cls.harmonic]
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev }
+  }, [onClose])
+
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <section
+        className="sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sheet-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <header className="sheet-head">
+          <div>
+            <h2 id="sheet-title">{weapon.name}</h2>
+            <p>{cls.name}{lvl > 0 && <span className={`t${lvl}`}> · {TIER_NAME[lvl]}</span>}</p>
+          </div>
+          <button className="sheet-close" onClick={onClose} aria-label="Fermer">✕</button>
+        </header>
+
+        <h3>Camos spéciaux, avant le Gold</h3>
+        <ul className="sheet-list">
+          {(SPECIALS[weaponId] ?? []).map((sp) => (
+            <li key={sp.name}>
+              <b>{sp.name}</b>
+              <span>{sp.mp}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="sheet-note">Défis multijoueur. Les défis DMZ arriveront plus tard.</p>
+
+        <h3>Paliers de la catégorie</h3>
+        <ul className="sheet-list">
+          {TIERS.map((t, i) => (
+            <li key={t.key} className={stage === t.level ? 'current' : ''}>
+              <b className={`t${t.level}`}>{t.name}</b>
+              <span>{tiers[i].mp} en MP, {tiers[i].dmz} en DMZ</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
   )
 }

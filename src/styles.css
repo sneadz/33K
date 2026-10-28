@@ -268,3 +268,41 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* Catégorie affichée dans la fiche : mise en avant à droite */
 .desk-cols .cls.sel .cls-head h2 { color: var(--gold-solid); }
+
+/* Nom d'arme cliquable (mobile) */
+.row-open { background: none; border: 0; padding: 0; text-align: left; color: inherit; cursor: pointer; }
+.row-open span { text-decoration: underline; text-decoration-color: #4a5340; text-underline-offset: 4px; }
+
+/* Fiche d'une arme : panneau qui monte du bas */
+.sheet-backdrop {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgba(10, 12, 8, 0.6);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: fade 0.15s ease;
+}
+.sheet {
+  width: 100%; max-width: 640px; max-height: 85dvh; overflow-y: auto;
+  background: var(--surface);
+  border-radius: 16px 16px 0 0;
+  padding: 20px 20px calc(24px + env(safe-area-inset-bottom));
+  animation: rise 0.2s ease;
+}
+@keyframes fade { from { opacity: 0; } }
+@keyframes rise { from { transform: translateY(40px); opacity: 0; } }
+.sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.sheet-head h2 { font: 900 32px/1 var(--display); margin: 0 0 4px; }
+.sheet-head p { margin: 0; color: var(--muted); font-size: 15px; }
+.sheet-head p .t1 { color: var(--gold-solid); }
+.sheet-head p .t2 { color: var(--plat-solid); }
+.sheet-head p .t3 { color: var(--hb-solid); }
+.sheet-close { width: 40px; height: 40px; border: 0; border-radius: 50%; background: #2b3225; color: var(--bone); font-size: 16px; flex: none; }
+.sheet h3 { font: 800 18px/1 var(--display); color: var(--muted); margin: 22px 0 8px; }
+.sheet-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.sheet-list li { display: grid; gap: 2px; }
+.sheet-list b { font-weight: 600; font-size: 16px; }
+.sheet-list b.t1 { color: var(--gold-solid); }
+.sheet-list b.t2 { color: var(--plat-solid); }
+.sheet-list b.t3 { color: var(--hb-solid); }
+.sheet-list span { color: var(--muted); font-size: 15px; }
+.sheet-list li.current span { color: var(--bone); }
+.sheet-note { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
