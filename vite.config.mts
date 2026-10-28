@@ -1,7 +1,7 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
-import { auth, getState, memoryStore, setProgress } from './api/_core'
+import { auth, getState, memoryStore, setProgress } from './api/_core.js'
 
 // En local (`npm run dev`), les routes /api tournent en mémoire : pas besoin de Redis.
 function devApi(): Plugin {

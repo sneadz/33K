@@ -1,6 +1,6 @@
 import { Redis } from '@upstash/redis'
 import type { VercelResponse } from '@vercel/node'
-import type { Result, Store } from './_core'
+import type { Result, Store } from './_core.js'
 
 // L'intégration Upstash de la Marketplace Vercel injecte KV_REST_API_URL / KV_REST_API_TOKEN.
 export function redisStore(): Store {

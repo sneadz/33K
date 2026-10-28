@@ -1,7 +1,7 @@
 // Logique API indépendante du stockage : utilisée par les fonctions Vercel (Redis)
 // et par le serveur de dev Vite (mémoire).
 import { createHash } from 'crypto'
-import { MASTERY_IDS, PLAYERS, PLAYER_IDS, WEAPON_IDS } from '../src/data/weapons'
+import { MASTERY_IDS, PLAYERS, PLAYER_IDS, WEAPON_IDS } from '../src/data/weapons.js'
 
 export interface Store {
   get(key: string): Promise<string | null>
