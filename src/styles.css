@@ -5,7 +5,6 @@
   --line: #394130;
   --bone: #ebe6d4;
   --muted: #a2a58e;
-  --friend: #8fb3cf;
   --danger: #e2876f;
 
   --gold: linear-gradient(160deg, #f6dc8a 0%, #d9a93c 45%, #a8771f 100%);
@@ -97,27 +96,40 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .app { max-width: 640px; margin: 0 auto; padding: max(12px, env(safe-area-inset-top)) 16px 96px; }
 .top { display: flex; justify-content: space-between; align-items: center; padding: 4px 0 16px; }
 
-.board { display: grid; gap: 18px; padding: 18px; background: var(--surface); border-radius: 12px; }
-.sum-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.board { padding: 14px 16px; background: var(--surface); border-radius: 12px; }
+.me-head { display: flex; justify-content: space-between; align-items: baseline; }
 .pname { font: 800 22px/1 var(--display); }
-.sum-count { font: 600 15px/1 var(--body); color: var(--muted); }
-.sum-count b { font: 900 32px/1 var(--display); color: var(--bone); margin-right: 1px; }
+.me-count { font: 600 15px/1 var(--body); color: var(--muted); }
+.me-count b { font: 900 30px/1 var(--display); color: var(--bone); margin-right: 1px; }
+.bar { height: 8px; margin-top: 10px; border-radius: 4px; background: #323a2b; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+.bar i.t1 { background: var(--gold); }
+.bar i.t2 { background: var(--plat); }
+.bar i.t3 { background: var(--hb); }
 
-/* 33 cases strictement identiques */
-.cells { display: grid; grid-template-columns: repeat(33, 1fr); gap: 3px; }
-.cells i { aspect-ratio: 1 / 2.2; border-radius: 2px; background: #323a2b; }
-.cells i.l1 { background: var(--gold); }
-.cells i.l2 { background: var(--plat); }
-.cells i.l3 { background: var(--hb); }
-
-.sum.small .pname { font-size: 17px; color: var(--muted); }
-.sum.small .sum-count b { font-size: 20px; color: var(--muted); }
-.sum.small .cells i { aspect-ratio: 1 / 1; opacity: 0.75; }
+.team-toggle {
+  display: flex; align-items: center; gap: 6px;
+  margin: 10px 0 0; padding: 4px 0;
+  background: none; border: 0;
+  color: var(--muted); font: 600 14px/1 var(--body);
+}
+.team { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; }
+.team th, .team td { padding: 6px 4px; text-align: center; }
+.team thead th { font: 800 15px/1 var(--display); color: var(--muted); }
+.team thead th.me-col { color: var(--bone); }
+.team tbody th { text-align: left; font-weight: 600; color: var(--muted); width: 22%; }
+.team td { font-variant-numeric: tabular-nums; font-weight: 600; }
+.team td.t1 { color: var(--gold-solid); }
+.team td.t2 { color: var(--plat-solid); }
+.team td.t3 { color: var(--hb-solid); }
+.team td.done { color: var(--muted); }
+.team tbody tr + tr { border-top: 1px solid #2c3326; }
+.team tr.total th, .team tr.total td { padding-top: 10px; }
 
 .switch { display: flex; align-items: center; gap: 10px; margin: 20px 0 4px; font-size: 15px; color: var(--muted); cursor: pointer; }
 .switch input { width: 18px; height: 18px; margin: 0; accent-color: var(--gold-solid); }
 
-.cls { padding-top: 28px; }
+.cls { padding-top: 22px; }
 .cls-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .cls-head h2 { font: 900 28px/1 var(--display); margin: 0; }
 .stage { font: 600 14px/1 var(--body); white-space: nowrap; }
@@ -127,7 +139,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .stage.done { color: var(--muted); }
 .challenge { margin: 6px 0 10px; font-size: 14px; color: var(--muted); }
 
-.row { display: flex; align-items: center; gap: 12px; min-height: 52px; }
+.row { display: flex; align-items: center; gap: 12px; min-height: 48px; }
 .row-name { flex: 1; min-width: 0; display: grid; }
 .row-name span { font-weight: 500; font-size: 17px; }
 .row-name small { color: var(--muted); font-size: 13px; }
@@ -180,20 +192,20 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .toast { bottom: calc(76px + env(safe-area-inset-bottom)); }
 
 /* Grille des catégories : un tap = n'afficher que celle-là, re-tap = tout */
-.cats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 16px; }
+.cats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
 .cat {
-  position: relative;
-  height: 46px;
+  height: 44px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
   border: 0; border-radius: 10px;
   background: var(--surface);
   color: var(--bone);
   font: 600 15px/1 var(--body);
 }
+.cat small { font-size: 13px; font-variant-numeric: tabular-nums; }
+.cat small.t1 { color: var(--gold-solid); }
+.cat small.t2 { color: var(--plat-solid); }
+.cat small.t3 { color: var(--hb-solid); }
+.cat small.done { color: var(--muted); }
 .cat[aria-pressed='true'] { background: var(--gold); color: #2a1e05; }
-.cat .dot { position: absolute; top: 7px; right: 8px; width: 6px; height: 6px; border-radius: 50%; }
-.cat .dot.t1 { background: var(--gold-solid); }
-.cat .dot.t2 { background: var(--plat-solid); }
-.cat .dot.t3 { background: var(--hb-solid); }
-.cat .dot.done { background: transparent; box-shadow: inset 0 0 0 1px var(--muted); }
-.cat[aria-pressed='true'] .dot { background: #2a1e05; box-shadow: none; }
-.switch { margin-top: 14px; }
+.cat[aria-pressed='true'] small { color: #2a1e05; }
+.switch { margin-top: 12px; }

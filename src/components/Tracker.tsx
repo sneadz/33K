@@ -9,8 +9,10 @@ const PREFS_KEY = '33k:prefs'
 
 type Pending = Record<string, number> // "weapon:han-86" -> niveau en cours d'envoi
 
-function readPrefs(): { remaining: boolean } {
-  try { return { remaining: true, ...JSON.parse(localStorage.getItem(PREFS_KEY) ?? '{}') } } catch { return { remaining: true } }
+type Prefs = { remaining: boolean; team: boolean }
+const DEFAULT_PREFS: Prefs = { remaining: true, team: false }
+function readPrefs(): Prefs {
+  try { return { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(PREFS_KEY) ?? '{}') } } catch { return DEFAULT_PREFS }
 }
 
 function withPending(state: AppState, me: string, pending: Pending): AppState {
@@ -32,6 +34,7 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
   const [pending, setPending] = useState<Pending>({})
   const [toast, setToast] = useState<string | null>(null)
   const [remaining, setRemaining] = useState(readPrefs().remaining)
+  const [teamOpen, setTeamOpen] = useState(readPrefs().team)
   const [filter, setFilter] = useState<string>('all') // 'all' | id de classe
   const pick = (id: string) => setFilter((f) => (f === id ? 'all' : id))
   const pendingRef = useRef(pending)
@@ -39,7 +42,6 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
 
   const meId = session.player
   const meName = PLAYERS.find((p) => p.id === meId)!.name
-  const others = PLAYERS.filter((p) => p.id !== meId)
 
   const state = useMemo(() => withPending(server, meId, pending), [server, meId, pending])
   const me = state.players[meId]
@@ -57,8 +59,8 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
   }, [refresh])
 
   useEffect(() => {
-    try { localStorage.setItem(PREFS_KEY, JSON.stringify({ remaining })) } catch { /* ignore */ }
-  }, [remaining])
+    try { localStorage.setItem(PREFS_KEY, JSON.stringify({ remaining, team: teamOpen })) } catch { /* ignore */ }
+  }, [remaining, teamOpen])
 
   useEffect(() => {
     if (!toast) return
@@ -99,10 +101,11 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
       </header>
 
       <section className="board" aria-label="Progression">
-        <Summary name={meName} state={me} />
-        {others.map((p) => (
-          <Summary key={p.id} name={p.name} state={state.players[p.id]} small />
-        ))}
+        <MyLine name={meName} state={me} />
+        <button className="team-toggle" aria-expanded={teamOpen} onClick={() => setTeamOpen((o) => !o)}>
+          Équipe <span aria-hidden="true">{teamOpen ? '▴' : '▾'}</span>
+        </button>
+        {teamOpen && <TeamTable meId={meId} state={state} />}
       </section>
 
       <nav className="cats" aria-label="Catégories">
@@ -110,8 +113,10 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
           const stage = classStage(c, me.progress)
           return (
             <button key={c.id} className="cat" aria-pressed={filter === c.id} onClick={() => pick(c.id)}>
-              {c.short}
-              <i className={`dot t${Math.min(stage, 3)} ${stage === 4 ? 'done' : ''}`} aria-hidden="true" />
+              <span>{c.short}</span>
+              <small className={stage === 4 ? 'done' : `t${stage}`}>
+                {stage === 4 ? '✓' : `${classCount(c, me.progress, stage)}/${c.weapons.length}`}
+              </small>
             </button>
           )
         })}
@@ -159,24 +164,63 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
   )
 }
 
-function Summary({ name, state, small = false }: { name: string; state: PlayerState; small?: boolean }) {
+/** Palier en cours d'un joueur sur une classe, en texte court : "3/8" ou "✓". */
+function classCell(c: WeaponClass, p: Progress) {
+  const stage = classStage(c, p)
+  return { stage, text: stage === 4 ? '✓' : `${classCount(c, p, stage)}/${c.weapons.length}` }
+}
+
+function MyLine({ name, state }: { name: string; state: PlayerState }) {
   const stage = globalStage(state.progress)
   const c = counts(state.progress)
   const done = stage === 4 ? 33 : [0, c.gold, c.platinum, c.harmonic][stage]
   return (
-    <div className={`sum ${small ? 'small' : ''}`}>
-      <div className="sum-head">
+    <div className="me">
+      <div className="me-head">
         <span className="pname">{name}</span>
-        <span className={`sum-count t${Math.min(stage, 3)}`}>
+        <span className="me-count">
           <b>{done}</b>/33 {stage < 4 ? TIER_NAME[stage] : 'Divergence'}
         </span>
       </div>
-      <div className="cells" aria-hidden="true">
-        {CLASSES.flatMap((cls) => cls.weapons).map((w) => (
-          <i key={w.id} className={`l${levelOf(state.progress, w.id)}`} />
-        ))}
+      <div className="bar" aria-hidden="true">
+        <i className={`t${Math.min(stage, 3)}`} style={{ width: `${(done / 33) * 100}%` }} />
       </div>
     </div>
+  )
+}
+
+function TeamTable({ meId, state }: { meId: string; state: AppState }) {
+  // Toi en premier, puis les autres.
+  const players = [...PLAYERS].sort((a, b) => (a.id === meId ? -1 : b.id === meId ? 1 : 0))
+  return (
+    <table className="team">
+      <thead>
+        <tr>
+          <th />
+          {players.map((p) => <th key={p.id} className={p.id === meId ? 'me-col' : ''}>{p.name}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {CLASSES.map((c) => (
+          <tr key={c.id}>
+            <th scope="row">{c.short}</th>
+            {players.map((p) => {
+              const { stage, text } = classCell(c, state.players[p.id].progress)
+              return <td key={p.id} className={`${stage === 4 ? 'done' : `t${stage}`} ${p.id === meId ? 'me-col' : ''}`}>{text}</td>
+            })}
+          </tr>
+        ))}
+        <tr className="total">
+          <th scope="row">Total</th>
+          {players.map((p) => {
+            const st = globalStage(state.players[p.id].progress)
+            const c = counts(state.players[p.id].progress)
+            const done = st === 4 ? 33 : [0, c.gold, c.platinum, c.harmonic][st]
+            return <td key={p.id} className={`t${Math.min(st, 3)} ${p.id === meId ? 'me-col' : ''}`}>{done}/33</td>
+          })}
+        </tr>
+      </tbody>
+    </table>
   )
 }
 
