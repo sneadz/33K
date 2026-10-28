@@ -32,6 +32,8 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
   const [pending, setPending] = useState<Pending>({})
   const [toast, setToast] = useState<string | null>(null)
   const [remaining, setRemaining] = useState(readPrefs().remaining)
+  const [filter, setFilter] = useState<string>('all') // 'all' | id de classe
+  const pick = (id: string) => setFilter((f) => (f === id ? 'all' : id))
   const pendingRef = useRef(pending)
   pendingRef.current = pending
 
@@ -102,17 +104,29 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
         <Summary name={friend.name} state={them} small />
       </section>
 
+      <nav className="cats" aria-label="Catégories">
+        {CLASSES.map((c) => {
+          const stage = classStage(c, me.progress)
+          return (
+            <button key={c.id} className="cat" aria-pressed={filter === c.id} onClick={() => pick(c.id)}>
+              {c.short}
+              <i className={`dot t${Math.min(stage, 3)} ${stage === 4 ? 'done' : ''}`} aria-hidden="true" />
+            </button>
+          )
+        })}
+      </nav>
+
       <label className="switch">
         <input type="checkbox" checked={remaining} onChange={(e) => setRemaining(e.target.checked)} />
         <span>Masquer ce qui est fait</span>
       </label>
 
       <main>
-        {CLASSES.map((c) => (
+        {CLASSES.filter((c) => filter === 'all' || filter === c.id).map((c) => (
           <ClassSection key={c.id} cls={c} me={me.progress} remaining={remaining} onTap={tapTier} />
         ))}
 
-        <section className="cls">
+        {filter === 'all' && <section className="cls">
           <header className="cls-head">
             <h2>Mastery</h2>
           </header>
@@ -136,7 +150,7 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
               </div>
             )
           })}
-        </section>
+        </section>}
       </main>
 
       {toast && <div className="toast" role="status">{toast}</div>}
