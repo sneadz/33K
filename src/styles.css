@@ -101,11 +101,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .pname { font: 800 22px/1 var(--display); }
 .me-count { font: 600 15px/1 var(--body); color: var(--muted); }
 .me-count b { font: 900 30px/1 var(--display); color: var(--bone); margin-right: 1px; }
-.bar { height: 8px; margin-top: 10px; border-radius: 4px; background: #323a2b; overflow: hidden; }
-.bar i { display: block; height: 100%; border-radius: 4px; transition: width 0.3s ease; }
-.bar i.t1 { background: var(--gold); }
-.bar i.t2 { background: var(--plat); }
-.bar i.t3 { background: var(--hb); }
+/* Les lingots : 33 carrés identiques, un petit espace entre les catégories */
+.racks { --cat-gap: 5px; display: grid; column-gap: 1.5px; margin-top: 10px; }
+.racks i { aspect-ratio: 1 / 1.15; border-radius: 1.5px; background: #353d2e; }
+.racks.big i { aspect-ratio: 1 / 1.3; border-radius: 2px; }
+.racks i.l1 { background: var(--gold); }
+.racks i.l2 { background: var(--plat); }
+.racks i.l3 { background: var(--hb); }
 
 .team-toggle {
   display: flex; align-items: center; gap: 6px;
@@ -113,18 +115,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
   background: none; border: 0;
   color: var(--muted); font: 600 14px/1 var(--body);
 }
-.team { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; }
-.team th, .team td { padding: 6px 4px; text-align: center; }
-.team thead th { font: 800 15px/1 var(--display); color: var(--muted); }
-.team thead th.me-col { color: var(--bone); }
-.team tbody th { text-align: left; font-weight: 600; color: var(--muted); width: 22%; }
-.team td { font-variant-numeric: tabular-nums; font-weight: 600; }
-.team td.t1 { color: var(--gold-solid); }
-.team td.t2 { color: var(--plat-solid); }
-.team td.t3 { color: var(--hb-solid); }
-.team td.done { color: var(--muted); }
-.team tbody tr + tr { border-top: 1px solid #2c3326; }
-.team tr.total th, .team tr.total td { padding-top: 10px; }
+.team { display: grid; gap: 12px; margin-top: 8px; }
+.mate-head { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.mate .racks { margin-top: 0; }
+.mate .racks i { opacity: 0.85; }
 
 .switch { display: flex; align-items: center; gap: 10px; margin: 20px 0 4px; font-size: 15px; color: var(--muted); cursor: pointer; }
 .switch input { width: 18px; height: 18px; margin: 0; accent-color: var(--gold-solid); }

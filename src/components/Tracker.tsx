@@ -105,7 +105,7 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
         <button className="team-toggle" aria-expanded={teamOpen} onClick={() => setTeamOpen((o) => !o)}>
           Équipe <span aria-hidden="true">{teamOpen ? '▴' : '▾'}</span>
         </button>
-        {teamOpen && <TeamTable meId={meId} state={state} />}
+        {teamOpen && <TeamRacks meId={meId} state={state} />}
       </section>
 
       <nav className="cats" aria-label="Catégories">
@@ -164,16 +164,28 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
   )
 }
 
-/** Palier en cours d'un joueur sur une classe, en texte court : "3/8" ou "✓". */
-function classCell(c: WeaponClass, p: Progress) {
-  const stage = classStage(c, p)
-  return { stage, text: stage === 4 ? '✓' : `${classCount(c, p, stage)}/${c.weapons.length}` }
+function stageCount(p: Progress) {
+  const stage = globalStage(p)
+  const c = counts(p)
+  return { stage, done: stage === 4 ? 33 : [0, c.gold, c.platinum, c.harmonic][stage] }
+}
+
+/** 33 carrés identiques sur une ligne, avec un petit espace entre les catégories. */
+const RACK_COLUMNS = CLASSES.map((c) => `repeat(${c.weapons.length}, 1fr)`).join(' var(--cat-gap) ')
+
+function Racks({ progress, big = false }: { progress: Progress; big?: boolean }) {
+  return (
+    <div className={`racks ${big ? 'big' : ''}`} style={{ gridTemplateColumns: RACK_COLUMNS }} aria-hidden="true">
+      {CLASSES.map((c, ci) => [
+        ci > 0 && <b key={`sep-${c.id}`} />,
+        ...c.weapons.map((w) => <i key={w.id} className={`l${levelOf(progress, w.id)}`} />),
+      ])}
+    </div>
+  )
 }
 
 function MyLine({ name, state }: { name: string; state: PlayerState }) {
-  const stage = globalStage(state.progress)
-  const c = counts(state.progress)
-  const done = stage === 4 ? 33 : [0, c.gold, c.platinum, c.harmonic][stage]
+  const { stage, done } = stageCount(state.progress)
   return (
     <div className="me">
       <div className="me-head">
@@ -182,45 +194,27 @@ function MyLine({ name, state }: { name: string; state: PlayerState }) {
           <b>{done}</b>/33 {stage < 4 ? TIER_NAME[stage] : 'Divergence'}
         </span>
       </div>
-      <div className="bar" aria-hidden="true">
-        <i className={`t${Math.min(stage, 3)}`} style={{ width: `${(done / 33) * 100}%` }} />
-      </div>
+      <Racks progress={state.progress} big />
     </div>
   )
 }
 
-function TeamTable({ meId, state }: { meId: string; state: AppState }) {
-  // Toi en premier, puis les autres.
-  const players = [...PLAYERS].sort((a, b) => (a.id === meId ? -1 : b.id === meId ? 1 : 0))
+function TeamRacks({ meId, state }: { meId: string; state: AppState }) {
   return (
-    <table className="team">
-      <thead>
-        <tr>
-          <th />
-          {players.map((p) => <th key={p.id} className={p.id === meId ? 'me-col' : ''}>{p.name}</th>)}
-        </tr>
-      </thead>
-      <tbody>
-        {CLASSES.map((c) => (
-          <tr key={c.id}>
-            <th scope="row">{c.short}</th>
-            {players.map((p) => {
-              const { stage, text } = classCell(c, state.players[p.id].progress)
-              return <td key={p.id} className={`${stage === 4 ? 'done' : `t${stage}`} ${p.id === meId ? 'me-col' : ''}`}>{text}</td>
-            })}
-          </tr>
-        ))}
-        <tr className="total">
-          <th scope="row">Total</th>
-          {players.map((p) => {
-            const st = globalStage(state.players[p.id].progress)
-            const c = counts(state.players[p.id].progress)
-            const done = st === 4 ? 33 : [0, c.gold, c.platinum, c.harmonic][st]
-            return <td key={p.id} className={`t${Math.min(st, 3)} ${p.id === meId ? 'me-col' : ''}`}>{done}/33</td>
-          })}
-        </tr>
-      </tbody>
-    </table>
+    <div className="team">
+      {PLAYERS.filter((p) => p.id !== meId).map((p) => {
+        const { stage, done } = stageCount(state.players[p.id].progress)
+        return (
+          <div key={p.id} className="mate">
+            <div className="mate-head">
+              <span>{p.name}</span>
+              <span>{done}/33 {stage < 4 ? TIER_NAME[stage] : 'Divergence'}</span>
+            </div>
+            <Racks progress={state.players[p.id].progress} />
+          </div>
+        )
+      })}
+    </div>
   )
 }
 
