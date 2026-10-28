@@ -8,8 +8,16 @@ export function redisStore(): Store {
   const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN
   if (!url || !token) throw new Error('Base Upstash non connectée (KV_REST_API_URL manquant).')
   const r = new Redis({ url, token, automaticDeserialization: false })
-  const toNumbers = (o: Record<string, unknown> | null) =>
-    Object.fromEntries(Object.entries(o ?? {}).map(([f, v]) => [f, Number(v)]))
+  // Sans désérialisation auto, HGETALL renvoie la liste brute [champ, valeur, champ, valeur…].
+  const toNumbers = (raw: unknown): Record<string, number> => {
+    const out: Record<string, number> = {}
+    if (Array.isArray(raw)) {
+      for (let i = 0; i + 1 < raw.length; i += 2) out[String(raw[i])] = Number(raw[i + 1])
+    } else if (raw && typeof raw === 'object') {
+      for (const [f, v] of Object.entries(raw)) out[f] = Number(v)
+    }
+    return out
+  }
   return {
     async get(key) { return (await r.get<string>(key)) ?? null },
     async setNx(key, value) { return (await r.set(key, value, { nx: true })) === 'OK' },
