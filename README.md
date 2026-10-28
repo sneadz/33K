@@ -8,7 +8,7 @@
 - Platinum s'ouvre sur une classe quand toutes ses armes sont Gold (indiqué, pas bloqué).
 - Divergence est calculé : débloqué à 33 Harmonic Break.
 - Camos mastery MP (Mercurial Drift, Polyatomic Reforged, Orion Reforged) et DMZ (Chiral, Ripple Tide, Helio) en cases à cocher.
-- Deux joueurs, un code à 4 chiffres chacun (créé à la première connexion). Chacun voit l'autre, ne modifie que lui-même.
+- Plusieurs joueurs, un code à 4 chiffres chacun (créé à la première connexion). Chacun voit l'autre, ne modifie que lui-même.
 - Synchro toutes les 5 s et au retour sur l'onglet. PWA installable (« Ajouter à l'écran d'accueil »).
 
 ## Stack
@@ -46,4 +46,4 @@ npm run build
 2. Onglet **Storage** → **Upstash for Redis** (plan gratuit) → connecter au projet. Les variables `KV_REST_API_URL` / `KV_REST_API_TOKEN` sont injectées automatiquement.
 3. Redéployer.
 
-Renommer « Joueur 2 » : `PLAYERS` dans `src/data/weapons.ts` (garder l'`id`).
+Ajouter ou renommer un joueur : `PLAYERS` dans `src/data/weapons.ts` (ne jamais changer un `id` existant, il porte les données).

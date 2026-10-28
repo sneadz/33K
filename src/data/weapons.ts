@@ -131,7 +131,8 @@ export const MASTERY_IDS = new Set<string>(MASTERY.map((m) => m.id))
 
 export const PLAYERS = [
   { id: 'robin', name: 'Robin' },
-  { id: 'joueur2', name: 'Joueur 2' },
+  { id: 'joueur2', name: 'Nico' }, // id conservé pour garder ses données
+  { id: 'bastien', name: 'Bastien' },
 ] as const
 export type PlayerId = (typeof PLAYERS)[number]['id']
 export const PLAYER_IDS = new Set<string>(PLAYERS.map((p) => p.id))

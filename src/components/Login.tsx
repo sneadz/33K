@@ -29,7 +29,7 @@ export default function Login({ state, onSignIn }: { state: AppState; onSignIn: 
   return (
     <main className="login">
       <h1 className="wordmark big">33K</h1>
-      <p className="tagline">33 armes. Deux joueurs. Tout en or.</p>
+      <p className="tagline">33 armes. Toute l'équipe. Tout en or.</p>
 
       <p className="login-q">Qui joue ?</p>
       <div className="player-pick">
@@ -62,7 +62,7 @@ export default function Login({ state, onSignIn }: { state: AppState; onSignIn: 
             value={pin}
             onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
           />
-          {creating && <p className="hint">Tu le taperas sur chaque nouvel appareil. Ton pote ne pourra pas cocher à ta place.</p>}
+          {creating && <p className="hint">Tu le taperas sur chaque nouvel appareil. Les autres ne pourront pas cocher à ta place.</p>}
           {error && <p className="error" role="alert">{error}</p>}
           <button className="btn gold" disabled={pin.length !== 4 || busy}>
             {creating ? 'Créer mon code' : 'Entrer'}

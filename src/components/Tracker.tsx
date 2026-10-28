@@ -39,11 +39,10 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
 
   const meId = session.player
   const meName = PLAYERS.find((p) => p.id === meId)!.name
-  const friend = PLAYERS.find((p) => p.id !== meId)!
+  const others = PLAYERS.filter((p) => p.id !== meId)
 
   const state = useMemo(() => withPending(server, meId, pending), [server, meId, pending])
   const me = state.players[meId]
-  const them = state.players[friend.id]
 
   // Synchro : toutes les 5 s quand l'onglet est visible, et dès qu'on revient dessus.
   const refresh = useCallback(() => {
@@ -101,7 +100,9 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
 
       <section className="board" aria-label="Progression">
         <Summary name={meName} state={me} />
-        <Summary name={friend.name} state={them} small />
+        {others.map((p) => (
+          <Summary key={p.id} name={p.name} state={state.players[p.id]} small />
+        ))}
       </section>
 
       <nav className="cats" aria-label="Catégories">
