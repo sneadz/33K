@@ -271,7 +271,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* Nom d'arme cliquable (mobile) */
 .row-open { background: none; border: 0; padding: 0; text-align: left; color: inherit; cursor: pointer; }
-.row-open span { text-decoration: underline; text-decoration-color: #4a5340; text-underline-offset: 4px; }
 
 /* Fiche d'une arme : panneau qui monte du bas */
 .sheet-backdrop {
@@ -284,9 +283,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
   width: 100%; max-width: 640px; max-height: 85dvh; overflow-y: auto;
   background: var(--surface);
   border-radius: 16px 16px 0 0;
-  padding: 20px 20px calc(24px + env(safe-area-inset-bottom));
+  padding: 10px 20px calc(24px + env(safe-area-inset-bottom));
   animation: rise 0.2s ease;
+  overscroll-behavior: contain;
 }
+.sheet-grip { width: 40px; height: 5px; border-radius: 3px; background: #4a5340; margin: 0 auto 14px; }
 @keyframes fade { from { opacity: 0; } }
 @keyframes rise { from { transform: translateY(40px); opacity: 0; } }
 .sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }

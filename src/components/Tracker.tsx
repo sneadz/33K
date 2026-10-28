@@ -396,15 +396,60 @@ function WeaponSheet({ weaponId, me, onClose }: { weaponId: string; me: Progress
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev }
   }, [onClose])
 
+  // Swipe vers le bas pour fermer : on tire le panneau quand il est scrollé tout en haut,
+  // au-delà de 80 px (ou d'un geste rapide) il se ferme, sinon il revient en place.
+  const sheetRef = useRef<HTMLElement>(null)
+  const backdropRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = sheetRef.current
+    if (!el) return
+    let startY = 0, startT = 0, dy = 0, dragging = false
+    const setY = (y: number, animate: boolean) => {
+      el.style.transition = animate ? 'transform 0.2s ease' : 'none'
+      el.style.transform = y ? `translateY(${y}px)` : ''
+      if (backdropRef.current) backdropRef.current.style.backgroundColor = `rgba(10, 12, 8, ${0.6 * Math.max(0, 1 - y / 400)})`
+    }
+    const onStart = (e: TouchEvent) => {
+      startY = e.touches[0].clientY; startT = Date.now(); dy = 0
+      dragging = el.scrollTop <= 0
+    }
+    const onMove = (e: TouchEvent) => {
+      if (!dragging) return
+      dy = e.touches[0].clientY - startY
+      if (dy > 0) { e.preventDefault(); setY(dy, false) } else { dy = 0; setY(0, false) }
+    }
+    const onEnd = () => {
+      if (!dragging) return
+      dragging = false
+      const fast = dy > 30 && dy / Math.max(1, Date.now() - startT) > 0.35
+      if (dy > 80 || fast) {
+        setY(el.offsetHeight, true)
+        setTimeout(onClose, 180)
+      } else setY(0, true)
+    }
+    el.addEventListener('touchstart', onStart, { passive: true })
+    el.addEventListener('touchmove', onMove, { passive: false })
+    el.addEventListener('touchend', onEnd)
+    el.addEventListener('touchcancel', onEnd)
+    return () => {
+      el.removeEventListener('touchstart', onStart)
+      el.removeEventListener('touchmove', onMove)
+      el.removeEventListener('touchend', onEnd)
+      el.removeEventListener('touchcancel', onEnd)
+    }
+  }, [onClose])
+
   return (
-    <div className="sheet-backdrop" onClick={onClose}>
+    <div className="sheet-backdrop" ref={backdropRef} onClick={onClose}>
       <section
+        ref={sheetRef}
         className="sheet"
         role="dialog"
         aria-modal="true"
         aria-labelledby="sheet-title"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="sheet-grip" aria-hidden="true" />
         <header className="sheet-head">
           <div>
             <h2 id="sheet-title">{weapon.name}</h2>
