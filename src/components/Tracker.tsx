@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CLASSES, MASTERY, PLAYERS, TIERS, type WeaponClass } from '../data/weapons'
+import { SPECIALS } from '../data/specials'
 import { ApiError, fetchState, save, type AppState, type PlayerState, type Session } from '../lib/api'
 import { classCount, classStage, counts, globalStage, levelOf, type Progress } from '../lib/rules'
 
@@ -107,6 +108,46 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
 
   const masteryOpen = counts(me.progress).divergence
   const desktop = useDesktop()
+  const [detail, setDetail] = useState(
+    () => (CLASSES.find((c) => classStage(c, initial.players[meId].progress) < 4) ?? CLASSES[0]).id,
+  )
+
+  const toggleTeam = () => setTeamOpen((o) => !o)
+  const board = (
+    <section
+      className="board"
+      role="button"
+      tabIndex={0}
+      aria-expanded={teamOpen}
+      aria-label={teamOpen ? "Replier l'équipe" : "Déplier l'équipe"}
+      onClick={toggleTeam}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTeam() }
+      }}
+    >
+      <MyLine name={meName} state={me} />
+      <span className="team-toggle" aria-hidden="true">
+        Équipe <span>{teamOpen ? '▴' : '▾'}</span>
+      </span>
+      {teamOpen && <TeamRacks meId={meId} state={state} />}
+    </section>
+  )
+
+  const catGrid = (selected: string, onPick: (id: string) => void) => (
+    <nav className="cats" aria-label="Catégories">
+      {CLASSES.map((c) => {
+        const stage = classStage(c, me.progress)
+        return (
+          <button key={c.id} className="cat" aria-pressed={selected === c.id} onClick={() => onPick(c.id)}>
+            <span>{c.short}</span>
+            <small className={stage === 4 ? 'done' : `t${stage}`}>
+              {stage === 4 ? '✓' : `${classCount(c, me.progress, stage)}/${c.weapons.length}`}
+            </small>
+          </button>
+        )
+      })}
+    </nav>
+  )
 
   const mastery = (
     <section className="cls">
@@ -137,6 +178,7 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
   )
 
   if (desktop) {
+    const cls = CLASSES.find((c) => c.id === detail)!
     return (
       <div className="app desk">
         <aside className="side">
@@ -148,13 +190,17 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
             <MyLine name={meName} state={me} />
             <TeamRacks meId={meId} state={state} />
           </section>
+          <ClassDetail cls={cls} me={me.progress} />
         </aside>
-        <main className="desk-cols">
-          {CLASSES.map((c) => (
-            <ClassSection key={c.id} cls={c} me={me.progress} remaining={false} onTap={tapTier} compact />
-          ))}
-          {mastery}
-        </main>
+        <div className="desk-main">
+          <main className="desk-cols">
+            {CLASSES.map((c) => (
+              <ClassSection key={c.id} cls={c} me={me.progress} remaining={false} onTap={tapTier} compact selected={c.id === detail} />
+            ))}
+            {mastery}
+          </main>
+          {catGrid(detail, setDetail)}
+        </div>
         {toast && <div className="toast" role="status">{toast}</div>}
       </div>
     )
@@ -167,37 +213,9 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
         <button className="link" onClick={onSignOut} title="Changer de joueur">{meName}</button>
       </header>
 
-      <section
-        className="board"
-        role="button"
-        tabIndex={0}
-        aria-expanded={teamOpen}
-        aria-label={teamOpen ? "Replier l'équipe" : "Déplier l'équipe"}
-        onClick={() => setTeamOpen((o) => !o)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTeamOpen((o) => !o) }
-        }}
-      >
-        <MyLine name={meName} state={me} />
-        <span className="team-toggle" aria-hidden="true">
-          Équipe <span>{teamOpen ? '▴' : '▾'}</span>
-        </span>
-        {teamOpen && <TeamRacks meId={meId} state={state} />}
-      </section>
+      {board}
 
-      <nav className="cats" aria-label="Catégories">
-        {CLASSES.map((c) => {
-          const stage = classStage(c, me.progress)
-          return (
-            <button key={c.id} className="cat" aria-pressed={filter === c.id} onClick={() => pick(c.id)}>
-              <span>{c.short}</span>
-              <small className={stage === 4 ? 'done' : `t${stage}`}>
-                {stage === 4 ? '✓' : `${classCount(c, me.progress, stage)}/${c.weapons.length}`}
-              </small>
-            </button>
-          )
-        })}
-      </nav>
+      {catGrid(filter, pick)}
 
       <label className="switch">
         <input type="checkbox" checked={remaining} onChange={(e) => setRemaining(e.target.checked)} />
@@ -271,12 +289,13 @@ function TeamRacks({ meId, state }: { meId: string; state: AppState }) {
   )
 }
 
-function ClassSection({ cls, me, remaining, onTap, compact = false }: {
+function ClassSection({ cls, me, remaining, onTap, compact = false, selected = false }: {
   cls: WeaponClass
   me: Progress
   remaining: boolean
   onTap: (weaponId: string, tier: number) => void
   compact?: boolean
+  selected?: boolean
 }) {
   const stage = classStage(cls, me)
   const total = cls.weapons.length
@@ -284,7 +303,7 @@ function ClassSection({ cls, me, remaining, onTap, compact = false }: {
   const ch = stage < 4 ? [cls.gold, cls.platinum, cls.harmonic][stage - 1] : null
 
   return (
-    <section className="cls">
+    <section className={`cls ${selected ? 'sel' : ''}`}>
       <header className="cls-head">
         <h2 title={compact && ch ? `${ch.mp} en MP, ${ch.dmz} en DMZ` : undefined}>{cls.name}</h2>
         <span className={`stage t${Math.min(stage, 3)} ${stage === 4 ? 'done' : ''}`}>
@@ -314,6 +333,40 @@ function ClassSection({ cls, me, remaining, onTap, compact = false }: {
           </div>
         )
       })}
+    </section>
+  )
+}
+
+/** Fiche complète d'une catégorie (vue ordi) : les 3 camos spéciaux de chaque arme, à finir avant le Gold. */
+function ClassDetail({ cls, me }: { cls: WeaponClass; me: Progress }) {
+  const stage = classStage(cls, me)
+  const ch = stage < 4 ? [cls.gold, cls.platinum, cls.harmonic][stage - 1] : null
+  return (
+    <section className="detail" aria-label={`Défis ${cls.name}`}>
+      <header className="detail-head">
+        <h2>{cls.name}</h2>
+        {ch && (
+          <p>
+            <b className={`t${stage}`}>{TIER_NAME[stage]} :</b> {ch.mp} en MP, {ch.dmz} en DMZ
+          </p>
+        )}
+      </header>
+      <p className="detail-sub">Camos spéciaux à finir avant le Gold (défis MP)</p>
+      <div className="detail-grid">
+        {cls.weapons.map((w) => {
+          const gold = levelOf(me, w.id) >= 1
+          return (
+            <div key={w.id} className={`dw ${gold ? 'gold' : ''}`}>
+              <h3>{w.name}{gold && <span className="dw-ok">Gold</span>}</h3>
+              <ul>
+                {(SPECIALS[w.id] ?? []).map((sp) => (
+                  <li key={sp.name}><span>{sp.name}</span>{sp.mp}</li>
+                ))}
+              </ul>
+            </div>
+          )
+        })}
+      </div>
     </section>
   )
 }

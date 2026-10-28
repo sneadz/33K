@@ -208,7 +208,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* Vue ordi : toute la fenêtre, sans scroll. --rh = hauteur d'une ligne, calée sur la hauteur de l'écran
    (la colonne la plus chargée fait ~21 lignes : 15 armes + 3 titres). */
 .app.desk {
-  --rh: clamp(30px, calc((100dvh - 80px) / 19.5), 68px);
+  --rh: clamp(28px, calc((100dvh - 80px) / 21.5), 64px);
   max-width: none;
   height: 100dvh;
   padding: clamp(20px, 3vh, 44px) clamp(24px, 3vw, 64px);
@@ -227,7 +227,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .desk .me-count b { font-size: calc(var(--rh) * 1.15); }
 .desk .racks { --cat-gap: calc(var(--rh) * 0.18); column-gap: 2px; margin-top: calc(var(--rh) * 0.4); }
 .desk .racks i { border-radius: 3px; }
-.desk .team { margin-top: calc(var(--rh) * 0.8); gap: calc(var(--rh) * 0.55); }
+.desk .team { margin-top: calc(var(--rh) * 0.6); gap: calc(var(--rh) * 0.4); }
 .desk .mate-head { font-size: calc(var(--rh) * 0.42); margin-bottom: calc(var(--rh) * 0.2); }
 
 .desk-cols { columns: 3; column-gap: clamp(32px, 3.5vw, 80px); min-height: 0; }
@@ -243,3 +243,28 @@ button { font: inherit; color: inherit; cursor: pointer; }
   border-radius: calc(var(--rh) * 0.2);
   font-size: calc(var(--rh) * 0.46);
 }
+
+/* Vue ordi : grille des catégories + fiche de la catégorie dans la colonne de gauche */
+.desk-main { display: flex; flex-direction: column; min-height: 0; }
+.desk-main .desk-cols { flex: 1; }
+.desk .cats { grid-template-columns: repeat(9, 1fr); margin-top: calc(var(--rh) * 0.3); gap: 8px; }
+.desk .cat { height: calc(var(--rh) * 1.15); font-size: calc(var(--rh) * 0.44); }
+.desk .cat small { font-size: calc(var(--rh) * 0.38); }
+.detail { margin-top: calc(var(--rh) * 0.55); min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+.detail-head h2 { font: 900 calc(var(--rh) * 0.78)/1 var(--display); margin: 0 0 4px; }
+.detail-head p { margin: 0; font-size: calc(var(--rh) * 0.4); color: var(--muted); }
+.detail-head b { font-weight: 600; }
+.detail-head b.t1 { color: var(--gold-solid); }
+.detail-head b.t2 { color: var(--plat-solid); }
+.detail-head b.t3 { color: var(--hb-solid); }
+.detail-sub { margin: calc(var(--rh) * 0.35) 0 calc(var(--rh) * 0.2); font-size: calc(var(--rh) * 0.36); color: var(--muted); }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--rh) * 0.35) 20px; }
+.dw h3 { display: flex; align-items: baseline; gap: 8px; margin: 0 0 2px; font: 600 calc(var(--rh) * 0.44)/1.2 var(--body); }
+.dw-ok { font-size: 0.75em; color: var(--gold-solid); }
+.dw ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.dw li { font-size: calc(var(--rh) * 0.37); line-height: 1.3; color: var(--muted); }
+.dw li span { color: var(--bone); margin-right: 6px; }
+.dw.gold { opacity: 0.45; }
+
+/* Catégorie affichée dans la fiche : mise en avant à droite */
+.desk-cols .cls.sel .cls-head h2 { color: var(--gold-solid); }
