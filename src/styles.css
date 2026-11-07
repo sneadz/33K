@@ -208,7 +208,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* Vue ordi : toute la fenêtre, sans scroll. --rh = hauteur d'une ligne, calée sur la hauteur de l'écran
    (la colonne la plus chargée fait ~21 lignes : 15 armes + 3 titres). */
 .app.desk {
-  --rh: clamp(28px, calc((100dvh - 80px) / 21.5), 64px);
+  --rh: clamp(22px, calc((100dvh - 80px) / 23.5), 60px);
   max-width: none;
   height: 100dvh;
   padding: clamp(20px, 3vh, 44px) clamp(24px, 3vw, 64px);
@@ -307,3 +307,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .sheet-list span { color: var(--muted); font-size: 15px; }
 .sheet-list li.current span { color: var(--bone); }
 .sheet-note { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+
+/* Armes de saison */
+.s-tag { margin-left: 8px; padding: 2px 6px; border-radius: 4px; background: #2b3225; color: var(--gold-solid); font: 600 11px/1 var(--body); vertical-align: 2px; }
+.s-tag.off { color: var(--muted); }
+.row.locked .row-name span { color: var(--muted); }
+.row.locked .tier { opacity: 0.35; cursor: not-allowed; }
+.racks i.locked { background: transparent; box-shadow: inset 0 0 0 1px #3d4634; }
+.dw li.pending, .sheet-list li.pending span { font-style: italic; color: var(--muted); }
+.sheet-note.season { margin-top: 12px; }

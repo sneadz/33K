@@ -1,4 +1,4 @@
-import { WEAPONS, TOTAL, type WeaponClass } from '../data/weapons'
+import { WEAPONS, TOTAL, baseWeapons, type WeaponClass } from '../data/weapons'
 
 export type Progress = Record<string, number>
 
@@ -15,8 +15,11 @@ export function counts(p: Progress) {
   return { gold, platinum, harmonic, divergence: harmonic >= TOTAL }
 }
 
+/** Nombre d'armes de base de la catégorie au moins à ce palier (les armes de saison ne comptent pas). */
 export const classCount = (c: WeaponClass, p: Progress, level: number) =>
-  c.weapons.filter((w) => levelOf(p, w.id) >= level).length
+  baseWeapons(c).filter((w) => levelOf(p, w.id) >= level).length
+
+export const classSize = (c: WeaponClass) => baseWeapons(c).length
 
 /**
  * Palier en cours d'une classe : Gold tant qu'une arme n'est pas Gold,
@@ -25,12 +28,12 @@ export const classCount = (c: WeaponClass, p: Progress, level: number) =>
  */
 export function classStage(c: WeaponClass, p: Progress): 1 | 2 | 3 | 4 {
   for (const level of [1, 2, 3] as const) {
-    if (classCount(c, p, level) < c.weapons.length) return level
+    if (classCount(c, p, level) < classSize(c)) return level
   }
   return 4
 }
 
-/** Palier en cours sur l'ensemble des 33 armes, pour le résumé. */
+/** Palier en cours vers Divergence : 33 armes au palier, armes de saison comprises. */
 export function globalStage(p: Progress): 1 | 2 | 3 | 4 {
   const c = counts(p)
   if (c.gold < TOTAL) return 1

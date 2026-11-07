@@ -14,6 +14,15 @@ export interface Challenge {
   dmz: string
 }
 
+export interface Weapon {
+  id: string
+  name: string
+  /** Arme ajoutée après le lancement : ne compte pas pour le Platinum de la catégorie. */
+  season?: number
+  /** Pas encore jouable (récompense d'événement à venir) : affichée grisée, non cochable. */
+  locked?: boolean
+}
+
 export interface WeaponClass {
   id: string
   name: string
@@ -21,15 +30,17 @@ export interface WeaponClass {
   gold: Challenge
   platinum: Challenge
   harmonic: Challenge
-  weapons: { id: string; name: string }[]
+  weapons: Weapon[]
 }
 
 const GOLD: Challenge = { mp: '15 kills en un match', dmz: '100 kills en un déploiement' }
 
-const w = (name: string) => ({
+const w = (name: string): Weapon => ({
   id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
   name,
 })
+/** Arme de saison (s1 = Saison 1). */
+const s1 = (name: string, locked = false): Weapon => ({ ...w(name), season: 1, ...(locked ? { locked } : {}) })
 
 export const CLASSES: WeaponClass[] = [
   {
@@ -39,7 +50,7 @@ export const CLASSES: WeaponClass[] = [
     gold: GOLD,
     platinum: { mp: '50 headshots', dmz: '100 headshots' },
     harmonic: { mp: '25 doublés', dmz: '50 doublés' },
-    weapons: ['Han 86', 'M4', 'Hyeon Burst', 'Patriot XMR', 'Kastov 762', 'Oden', 'Axion', 'Cronen Squall'].map(w),
+    weapons: ['Han 86', 'M4', 'Hyeon Burst', 'Patriot XMR', 'Kastov 762', 'Oden', 'Axion', 'Cronen Squall'].map(w).concat(s1('Cronen Osprey')),
   },
   {
     id: 'smg',
@@ -48,7 +59,7 @@ export const CLASSES: WeaponClass[] = [
     gold: GOLD,
     platinum: { mp: '25 kills de dos', dmz: '75 kills de dos' },
     harmonic: { mp: '50 kills sans viser', dmz: '100 kills sans viser' },
-    weapons: ['ISO Nightshade', 'VEL 46', 'WZ.55 Striga', 'PPSh-41', 'X-58 Nyx'].map(w),
+    weapons: ['ISO Nightshade', 'VEL 46', 'WZ.55 Striga', 'PPSh-41', 'X-58 Nyx'].map(w).concat(s1('CSG-35')),
   },
   {
     id: 'shotgun',
@@ -57,7 +68,7 @@ export const CLASSES: WeaponClass[] = [
     gold: GOLD,
     platinum: { mp: '50 kills sans viser', dmz: '125 kills sans viser' },
     harmonic: { mp: '2 kills sans recharger, 25 fois', dmz: '2 kills sans recharger, 50 fois' },
-    weapons: ['Rezi 12', 'Warlord'].map(w),
+    weapons: ['Rezi 12', 'Warlord'].map(w).concat(s1('JAK-12', true)),
   },
   {
     id: 'lmg',
@@ -111,13 +122,16 @@ export const CLASSES: WeaponClass[] = [
     gold: GOLD,
     platinum: { mp: '3 kills sans mourir, 15 fois', dmz: '3 kills sans dégâts, 50 fois' },
     harmonic: { mp: '25 kills de dos', dmz: '75 kills de dos' },
-    weapons: ['FSS Carbon Edge 1095'].map(w),
+    weapons: ['FSS Carbon Edge 1095'].map(w).concat(s1('ZLR Talonhawk', true)),
   },
 ]
 
 export const WEAPONS = CLASSES.flatMap((c) => c.weapons.map((wp) => ({ ...wp, classId: c.id })))
-export const WEAPON_IDS = new Set(WEAPONS.map((wp) => wp.id))
-export const TOTAL = WEAPONS.length // 33
+export const WEAPON_IDS = new Set(WEAPONS.filter((wp) => !wp.locked).map((wp) => wp.id))
+/** Objectif mastery : 33 armes, n'importe lesquelles (les armes de saison comptent). */
+export const TOTAL = 33
+/** Armes de base d'une catégorie : elles seules ouvrent le Platinum. */
+export const baseWeapons = (c: WeaponClass) => c.weapons.filter((wp) => !wp.season)
 
 export const MASTERY = [
   { id: 'mercurial-drift', mode: 'MP', name: 'Mercurial Drift', challenge: '10 kills en un match, 250 fois' },

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CLASSES, MASTERY, PLAYERS, TIERS, type WeaponClass } from '../data/weapons'
 import { SPECIALS } from '../data/specials'
 import { ApiError, fetchState, save, type AppState, type PlayerState, type Session } from '../lib/api'
-import { classCount, classStage, counts, globalStage, levelOf, type Progress } from '../lib/rules'
+import { classCount, classSize, classStage, counts, globalStage, levelOf, type Progress } from '../lib/rules'
 
 const POLL_MS = 5000
 const DESKTOP_QUERY = '(min-width: 1100px) and (pointer: fine)'
@@ -142,7 +142,7 @@ export default function Tracker({ session, initial, onSignOut }: { session: Sess
           <button key={c.id} className="cat" aria-pressed={selected === c.id} onClick={() => onPick(c.id)}>
             <span>{c.short}</span>
             <small className={stage === 4 ? 'done' : `t${stage}`}>
-              {stage === 4 ? '✓' : `${classCount(c, me.progress, stage)}/${c.weapons.length}`}
+              {stage === 4 ? '✓' : `${classCount(c, me.progress, stage)}/${classSize(c)}`}
             </small>
           </button>
         )
@@ -243,7 +243,7 @@ function stageCount(p: Progress) {
   return { stage, done: stage === 4 ? 33 : [0, c.gold, c.platinum, c.harmonic][stage] }
 }
 
-/** 33 carrés identiques sur une ligne, avec un petit espace entre les catégories. */
+/** Un carré par arme (armes de saison comprises), un petit espace entre les catégories. */
 const RACK_COLUMNS = CLASSES.map((c) => `repeat(${c.weapons.length}, 1fr)`).join(' var(--cat-gap) ')
 
 function Racks({ progress, big = false }: { progress: Progress; big?: boolean }) {
@@ -251,7 +251,7 @@ function Racks({ progress, big = false }: { progress: Progress; big?: boolean })
     <div className={`racks ${big ? 'big' : ''}`} style={{ gridTemplateColumns: RACK_COLUMNS }} aria-hidden="true">
       {CLASSES.map((c, ci) => [
         ci > 0 && <b key={`sep-${c.id}`} />,
-        ...c.weapons.map((w) => <i key={w.id} className={`l${levelOf(progress, w.id)}`} />),
+        ...c.weapons.map((w) => <i key={w.id} className={`l${levelOf(progress, w.id)} ${w.locked ? 'locked' : ''}`} />),
       ])}
     </div>
   )
@@ -301,7 +301,7 @@ function ClassSection({ cls, me, remaining, onTap, onOpen, compact = false, sele
   selected?: boolean
 }) {
   const stage = classStage(cls, me)
-  const total = cls.weapons.length
+  const total = classSize(cls)
   const visible = remaining ? cls.weapons.filter((w) => levelOf(me, w.id) < stage) : cls.weapons
   const ch = stage < 4 ? [cls.gold, cls.platinum, cls.harmonic][stage - 1] : null
 
@@ -317,14 +317,15 @@ function ClassSection({ cls, me, remaining, onTap, onOpen, compact = false, sele
 
       {visible.map((w) => {
         const lvl = levelOf(me, w.id)
+        const tag = w.season && <small className={`s-tag ${w.locked ? 'off' : ''}`}>{w.locked ? 'Bientôt' : `S${w.season}`}</small>
         return (
-          <div key={w.id} className="row">
+          <div key={w.id} className={`row ${w.locked ? 'locked' : ''}`}>
             {onOpen ? (
               <button className="row-name row-open" onClick={() => onOpen(w.id)} aria-label={`Défis de la ${w.name}`}>
-                <span>{w.name}</span>
+                <span>{w.name}{tag}</span>
               </button>
             ) : (
-              <div className="row-name"><span>{w.name}</span></div>
+              <div className="row-name"><span>{w.name}{tag}</span></div>
             )}
             <div className="tiers" role="group" aria-label={`${w.name}, ${TIER_NAME[lvl] || 'rien'}`}>
               {TIERS.map((t) => (
@@ -333,6 +334,7 @@ function ClassSection({ cls, me, remaining, onTap, onOpen, compact = false, sele
                   className={`tier t${t.level} ${lvl >= t.level ? 'on' : ''}`}
                   aria-pressed={lvl >= t.level}
                   aria-label={`${t.name}${lvl === t.level ? ' (retirer)' : ''}`}
+                  disabled={w.locked}
                   onClick={() => onTap(w.id, t.level)}
                 >
                   {t.short}
@@ -368,6 +370,7 @@ function ClassDetail({ cls, me }: { cls: WeaponClass; me: Progress }) {
             <div key={w.id} className={`dw ${gold ? 'gold' : ''}`}>
               <h3>{w.name}{gold && <span className="dw-ok">Gold</span>}</h3>
               <ul>
+                {!SPECIALS[w.id] && <li className="pending">{w.locked ? 'Récompense d’événement, pas encore jouable' : 'Infos à venir'}</li>}
                 {(SPECIALS[w.id] ?? []).map((sp) => (
                   <li key={sp.name}><span>{sp.name}</span>{sp.mp}</li>
                 ))}
@@ -458,8 +461,15 @@ function WeaponSheet({ weaponId, me, onClose }: { weaponId: string; me: Progress
           <button className="sheet-close" onClick={onClose} aria-label="Fermer">✕</button>
         </header>
 
+        {weapon.season && (
+          <p className="sheet-note season">
+            {weapon.locked ? 'Récompense d’événement de la Saison 1, pas encore jouable. ' : `Arme de la Saison ${weapon.season}. `}
+            Compte pour les 33 armes, pas pour le Platinum de la catégorie.
+          </p>
+        )}
         <h3>Camos spéciaux, avant le Gold</h3>
         <ul className="sheet-list">
+          {!SPECIALS[weaponId] && <li className="pending"><span>Infos à venir</span></li>}
           {(SPECIALS[weaponId] ?? []).map((sp) => (
             <li key={sp.name}>
               <b>{sp.name}</b>
