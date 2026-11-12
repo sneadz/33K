@@ -1,5 +1,5 @@
 // Les 3 camos spéciaux de chaque arme (à finir avant le Gold), défis multijoueur.
-// Source : Destructoid, recoupé avec CODMunity sur 6 armes.
+// Source : Destructoid, recoupé avec CODMunity sur 6 armes. Armes de saison : relevé en jeu.
 
 export interface Special {
   name: string
@@ -18,12 +18,15 @@ export const SPECIALS: Record<string, Special[]> = {
   oden: s(['Dark Moss', '25 kills au lance-grenades Miri'], ['Shale', '2 kills sans recharger, 10 fois'], ['Hot Rod', '100 kills en visée']),
   axion: s(['Splinter Rock', '20 kills à longue distance'], ['Sunset Tropic', '25 kills au lance-grenades Miri'], ['Cyan', '2 kills sans recharger, 25 fois']),
   'cronen-squall': s(['Oni', '20 kills à bout portant'], ['Urban Smoke', '20 kills en appui'], ['Optical Reverb', '3 kills sans mourir, 15 fois']),
+  // Saison 1 : relevé en jeu par Robin
+  'cronen-osprey': s(['In the Weeds', '20 kills sans viser'], ['Dark Ichor', '50 kills en visée'], ['Chained', '2 kills sans recharger, 25 fois']),
 
   // Mitraillettes
   'iso-nightshade': s(['Asphalt', '50 kills en visée'], ['Black Topo', '10 doublés'], ['Brown', '3 kills sans mourir, 15 fois']),
   'vel-46': s(['Jungle Shadow', '50 kills en visée'], ['Ghast', '20 kills couché'], ['Gunmetal', '20 headshots']),
   'wz-55-striga': s(['Stellation', '50 kills avec silencieux'], ['Rattlesnake', '20 kills en sautant'], ['Dark Tan', '40 kills à bout portant']),
   'ppsh-41': s(['Blackwell', '10 doublés'], ['Iron', '20 kills à longue distance'], ['Currents', '100 kills en visée']),
+  'csg-35': s(['Polymère', '3 kills sans mourir, 20 fois'], ['Peau dure', '50 kills avec silencieux'], ['Étreinte noire', '50 kills en mouvement']),
   'x-58-nyx': s(['Sniper Veil', '20 kills en mouvement'], ['Carbonated', '20 kills à longue distance'], ['Lime', '40 headshots']),
 
   // Fusils à pompe

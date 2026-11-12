@@ -5,7 +5,7 @@
 ## Fonctionnement
 
 - Une piste de camos par arme : **Gold → Platinum → Harmonic Break**, chaque palier se valide via le défi MP *ou* le défi DMZ.
-- Platinum s'ouvre sur une classe quand toutes ses armes sont Gold (indiqué, pas bloqué).
+- Platinum s'ouvre sur une classe quand autant d'armes que d'armes de base sont Gold, armes de saison comprises (indiqué, pas bloqué). Idem pour Harmonic Break.
 - Divergence est calculé : débloqué à 33 Harmonic Break.
 - Camos mastery MP (Mercurial Drift, Polyatomic Reforged, Orion Reforged) et DMZ (Chiral, Ripple Tide, Helio) en cases à cocher.
 - Plusieurs joueurs, un code à 4 chiffres chacun (créé à la première connexion). Chacun voit l'autre, ne modifie que lui-même.

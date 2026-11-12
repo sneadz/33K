@@ -15,15 +15,20 @@ export function counts(p: Progress) {
   return { gold, platinum, harmonic, divergence: harmonic >= TOTAL }
 }
 
-/** Nombre d'armes de base de la catégorie au moins à ce palier (les armes de saison ne comptent pas). */
+/**
+ * Nombre d'armes de la catégorie au moins à ce palier, armes de saison comprises,
+ * plafonné au nombre d'armes de base : c'est ce nombre qui ouvre le palier suivant.
+ * Ex. SMG : 5 armes en Gold (n'importe lesquelles) ouvrent le Platinum.
+ */
 export const classCount = (c: WeaponClass, p: Progress, level: number) =>
-  baseWeapons(c).filter((w) => levelOf(p, w.id) >= level).length
+  Math.min(classSize(c), c.weapons.filter((w) => levelOf(p, w.id) >= level).length)
 
+/** Nombre d'armes à avoir au palier pour ouvrir le suivant : le nombre d'armes de base. */
 export const classSize = (c: WeaponClass) => baseWeapons(c).length
 
 /**
- * Palier en cours d'une classe : Gold tant qu'une arme n'est pas Gold,
- * puis Platinum (ouvert quand toute la classe est Gold), puis Harmonic Break.
+ * Palier en cours d'une classe : Gold tant qu'il manque des armes en Gold,
+ * puis Platinum, puis Harmonic Break (seuil = nombre d'armes de base).
  * 4 = classe terminée.
  */
 export function classStage(c: WeaponClass, p: Progress): 1 | 2 | 3 | 4 {

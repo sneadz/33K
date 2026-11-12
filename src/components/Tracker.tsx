@@ -464,7 +464,7 @@ function WeaponSheet({ weaponId, me, onClose }: { weaponId: string; me: Progress
         {weapon.season && (
           <p className="sheet-note season">
             {weapon.locked ? 'Récompense d’événement de la Saison 1, pas encore jouable. ' : `Arme de la Saison ${weapon.season}. `}
-            Compte pour les 33 armes, pas pour le Platinum de la catégorie.
+            Compte pour les 33 armes et pour ouvrir le palier suivant de la catégorie.
           </p>
         )}
         <h3>Camos spéciaux, avant le Gold</h3>

@@ -17,7 +17,7 @@ export interface Challenge {
 export interface Weapon {
   id: string
   name: string
-  /** Arme ajoutée après le lancement : ne compte pas pour le Platinum de la catégorie. */
+  /** Arme ajoutée après le lancement : compte comme les autres, mais n'augmente pas le nombre d'armes à faire dans la catégorie. */
   season?: number
   /** Pas encore jouable (récompense d'événement à venir) : affichée grisée, non cochable. */
   locked?: boolean
@@ -50,7 +50,7 @@ export const CLASSES: WeaponClass[] = [
     gold: GOLD,
     platinum: { mp: '50 headshots', dmz: '100 headshots' },
     harmonic: { mp: '25 doublés', dmz: '50 doublés' },
-    weapons: ['Han 86', 'M4', 'Hyeon Burst', 'Patriot XMR', 'Kastov 762', 'Oden', 'Axion', 'Cronen Squall'].map(w).concat(s1('Cronen Osprey')),
+    weapons: ['Han 86', 'M4', 'Hyeon Burst', 'Kastov 762', 'Patriot XMR', 'Oden', 'Axion', 'Cronen Squall'].map(w).concat(s1('Cronen Osprey')),
   },
   {
     id: 'smg',
@@ -130,7 +130,7 @@ export const WEAPONS = CLASSES.flatMap((c) => c.weapons.map((wp) => ({ ...wp, cl
 export const WEAPON_IDS = new Set(WEAPONS.filter((wp) => !wp.locked).map((wp) => wp.id))
 /** Objectif mastery : 33 armes, n'importe lesquelles (les armes de saison comptent). */
 export const TOTAL = 33
-/** Armes de base d'une catégorie : elles seules ouvrent le Platinum. */
+/** Armes de base d'une catégorie : leur nombre fixe le seuil pour ouvrir Platinum puis Harmonic. */
 export const baseWeapons = (c: WeaponClass) => c.weapons.filter((wp) => !wp.season)
 
 export const MASTERY = [
